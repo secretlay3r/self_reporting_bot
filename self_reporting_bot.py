@@ -36,14 +36,14 @@ def on_new_message(bot, accid, event):
         with open(msg.file) as file:
             new_data = json.load(file)
 
-        statistics_id = new_data["statistics_id"]
-        if any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_" for c in statistics_id):
-            raise ValueError("Invalid statistics_id")
-        if len(statistics_id) < 11 or len(statistics_id) > 32:
-            raise ValueError("statistics_id has the wrong length")
+        stats_id = new_data["stats_id"]
+        if any(c not in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_" for c in stats_id):
+            raise ValueError("Invalid stats_id")
+        if len(stats_id) < 11 or len(stats_id) > 32:
+            raise ValueError("stats_id has the wrong length")
 
         Path("reports").mkdir(exist_ok=True)
-        filename = os.path.join("reports", statistics_id)
+        filename = os.path.join("reports", stats_id)
 
         new_data["timestamp_received_by_bot"] = int(time.time())
 
