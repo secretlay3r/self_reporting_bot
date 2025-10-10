@@ -57,10 +57,10 @@ def on_new_message(bot, accid, event):
         with open(filename, "w") as file:
             json.dump(existing_data, file, indent=4)
 
-        bot.rpc.misc_send_text_message(
+        bot.rpc.send_reaction(
             accid,
-            chatid,
-            "Thanks for sending statistics about your usage of Delta Chat to us! We will use it to improve the security of Delta Chat.",
+            msg.id,
+            ["❤️"],
         )
     except Exception:
         bot.logger.exception("Could not parse self_reporting message")
