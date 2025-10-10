@@ -57,6 +57,8 @@ def on_new_message(bot, accid, event):
         with open(filename, "w") as file:
             json.dump(existing_data, file, indent=4)
 
+        bot.logger.info(f"Successfully saved statistics from message {msg.id}.")
+
         bot.rpc.send_reaction(
             accid,
             msg.id,
@@ -100,6 +102,8 @@ def log_event(bot, accid, event):
         bot.logger.warning(event.msg)
     elif event.kind == EventType.ERROR:
         bot.logger.error(event.msg)
+    else:
+        bot.logger.info(f"Event: {event}")
 
 
 def main():
