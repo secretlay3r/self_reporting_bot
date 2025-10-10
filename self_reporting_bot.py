@@ -73,10 +73,7 @@ def on_new_message(bot, accid, event):
         )
 
 
-@cli.after(events.NewMessage)
-def cleanup_after_message(bot, accid, event):
-    msg = event.msg
-
+def cleanup_after_message(bot, accid, msg):
     contact_ids = bot.rpc.get_chat_contacts(accid, msg.chat_id)
 
     # First delete the chat,
@@ -102,6 +99,8 @@ def log_event(bot, accid, event):
         bot.logger.warning(event.msg)
     elif event.kind == EventType.ERROR:
         bot.logger.error(event.msg)
+    elif event.kind == EventType.MSG_DELIVERED:
+        cleanup_after_message(bot, accid, bot.rpc.get_message(accid, event.msg_id))
     else:
         bot.logger.info(f"Event: {event}")
 
