@@ -69,6 +69,7 @@ def on_new_message(bot, accid, event):
             chatid,
             "Sorry, I couldn't understand your message.\n\nI am a bot for receiving statistics about your usage of Delta Chat. All other messages will be ignored.",
         )
+    delete_everything(bot, accid, msg)
 
 
 @cli.on(events.RawEvent)
@@ -82,13 +83,33 @@ def log_event(bot, accid, event):
     elif event.kind == EventType.MSG_DELIVERED:
         delete_everything(bot, accid, bot.rpc.get_message(accid, event.msg_id))
 
+
 def delete_everything(bot, accid, msg):
     contact_ids = bot.rpc.get_chat_contacts(accid, msg.chat_id)
     bot.rpc.delete_chat(accid, msg.chat_id)
+
+    chat_ids = bot.rpc.get_chatlist_entries(accid, None, None, None)
+    for chat_id in chat_ids:
+        try:
+            bot.rpr.delete_chat(accid, chat_id)
+        except Exception:
+            bot.logger.exception("Could not delete chat")
+
+    delete_contacts(contact_ids)
+
+    contact_ids = bot.rpc.contact_ids(accid, 0, None)
+    delete_contacts(contact_ids)
+
+    bot.logger.info("Cleaned up all chats and contacts.")
+
+
+def delete_contacts(bot, accid, contact_ids):
     for contact_id in contact_ids:
         if contact_id != SpecialContactId.SELF:
-            bot.rpc.delete_contact(accid, contact_ids[0])
-
+            try:
+                bot.rpr.delete_contact(accid, contact_id)
+            except Exception:
+                bot.logger.exception("Could not delete contact")
 
 def main():
     cli.start()
@@ -102,5 +123,6 @@ if __name__ == "__main__":
 def on_init(bot, args):
     bot.logger.info("Initializing CLI with args: %s", args)
     for accid in bot.rpc.get_all_account_ids():
+        bot.logger.info("Using settings: %s", bot.rpc.get_info(accid))
         bot.rpc.set_config(accid, "delete_server_after", "1")
         bot.rpc.set_config(accid, "delete_device_after", "3600")
