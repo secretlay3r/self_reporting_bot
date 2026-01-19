@@ -93,16 +93,19 @@ def cleanup_after_message(bot, accid, msg):
 
 @cli.on(events.RawEvent)
 def log_event(bot, accid, event):
-    if event.kind == EventType.INFO:
-        bot.logger.info(event.msg)
-    elif event.kind == EventType.WARNING:
-        bot.logger.warning(event.msg)
-    elif event.kind == EventType.ERROR:
-        bot.logger.error(event.msg)
-    elif event.kind == EventType.MSG_DELIVERED:
+    log_map = {
+        EventType.INFO: bot.logger.info,
+        EventType.WARNING: bot.logger.warning, 
+        EventType.ERROR: bot.logger.error
+    }
+    if log_handler := log_map.get(event.kind):
+        log_handler(event.msg)
+        return
+    if event.kind == EventType.MSG_DELIVERED:
         cleanup_after_message(bot, accid, bot.rpc.get_message(accid, event.msg_id))
-    else:
-        bot.logger.info(f"Event: {event}")
+        return
+    
+    bot.logger.info(f"Event: {event}")
 
 
 def main():
